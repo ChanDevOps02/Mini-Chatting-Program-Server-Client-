@@ -60,17 +60,19 @@ public class ChanKaoTalk_Server extends Frame implements KeyListener {
         matching = new Button("Matching");
         matching.addActionListener((ae) -> {
             int port = 6000;
-            try{
+            try {
                 serverSocket = new ServerSocket(port);
                 serverClientSocket = serverSocket.accept();
-                if(serverClientSocket.isConnected()){
-                   setLabel("Client is now connected with Server");
-                   startMessageReceiver();
-                }
-                bufferedReader = new BufferedReader(new InputStreamReader(serverClientSocket.getInputStream()));
-                printWriter = new PrintWriter(serverClientSocket.getOutputStream());
+                if (serverClientSocket.isConnected()) {
+                    setLabel("Client is now connected with Server");
 
-            }catch(IOException e){
+                    // 👉 초기화 위치 수정
+                    bufferedReader = new BufferedReader(new InputStreamReader(serverClientSocket.getInputStream()));
+                    printWriter = new PrintWriter(serverClientSocket.getOutputStream(), true); // autoFlush 활성화
+
+                    startMessageReceiver();
+                }
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         });
@@ -113,14 +115,14 @@ public class ChanKaoTalk_Server extends Frame implements KeyListener {
             String otherMessage;
             try {
                 while ((otherMessage = bufferedReader.readLine()) != null) {
-                    Bigone.append(otherMessage + "\n");
+                    System.out.println("Received: " + otherMessage); // 디버깅용 로그
+                    Bigone.append(otherMessage + "\n"); // UI 업데이트
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }).start();
     }
-
     public void sendToOther(String message){
         new Thread(() -> {
             printWriter.println("Server : " + message + "\n");
